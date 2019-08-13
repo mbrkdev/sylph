@@ -25,24 +25,29 @@ function spacer (message, length) {
 function setRoute(path) {
   // Determine type
   let type = '';
-  console.log(path)
+  if((path.includes('/get/'))) type = 'get';
   if((path.includes('\\get\\'))) type = 'get';
+  if((path.includes('/post/'))) type = 'post';
   if((path.includes('\\post\\'))) type = 'post';
   // Resolve handler
   const routePath = `${process.cwd()}/${path}`;
-  console.log(routePath)
   const {handler, middleware} = require(routePath)
   // Route Normalisation
   const cleanRoute = path
-    .replace(/server\\(?:get|post)\\(.+).js/gi, '$1') // Strip all but path
-    .replace('\\', '/') // Backslash to forward slash
-    .replace('index', '') // Change index to nothing
-    .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
-    .replace(' ', '-') // Spaces to dashes
-    .replace('_', ':') // Underscore to colon (for dynamic routes)
-
+  .replace(/server\/(?:get|post)\/(.+).js/gi, '$1') // Strip all but path
+  .replace(/server\\(?:get|post)\\(.+).js/gi, '$1') // Strip all but path
+  .replace('\\', '/') // Backslash to forward slash
+  .replace('index', '') // Change index to nothing
+  .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
+  .replace(' ', '-') // Spaces to dashes
+  .replace('_', ':') // Underscore to colon (for dynamic routes)
+  
   let route = `/${cleanRoute}`;
+  console.log(path)
+  console.log(type)
+  console.log(routePath)
   console.log(route)
+  console.log(cleanRoute)
   console.log(`${chalk.blue(`  |  ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.green(route))
   if(!handler) {
     console.log(`${chalk.red(`|   ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.red(route))
