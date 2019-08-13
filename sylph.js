@@ -11,7 +11,8 @@ let routes = { get: {},  post: {} }
 let state = {};
 
 let app = express();
-app.use(express.static('./server/public'))
+app.disable('x-powered-by');
+app.use(express.static(__dirname + '/server/public'))
 console.clear()
 console.log(`${chalk.blue('Sylph')} Engine Starting`)
 
@@ -24,20 +25,24 @@ function spacer (message, length) {
 function setRoute(path) {
   // Determine type
   let type = '';
+  console.log(path)
   if((path.includes('\\get\\'))) type = 'get';
   if((path.includes('\\post\\'))) type = 'post';
   // Resolve handler
-  const {handler, middleware} = require(`./${path}`)
+  const routePath = `${__dirname}/${path}`;
+  console.log(routePath)
+  const {handler, middleware} = require(routePath)
   // Route Normalisation
   const cleanRoute = path
-    .replace(/server\\(?:get|post)\\(.+).js/, '$1') // Strip all but path
-    .replace('index', '') // Change index to nothing
+    .replace(/server\\(?:get|post)\\(.+).js/gi, '$1') // Strip all but path
     .replace('\\', '/') // Backslash to forward slash
-    .replace(/\/$/, '') // Remove ending slash (for xx/index)
+    .replace('index', '') // Change index to nothing
+    .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
     .replace(' ', '-') // Spaces to dashes
     .replace('_', ':') // Underscore to colon (for dynamic routes)
 
   let route = `/${cleanRoute}`;
+  console.log(route)
   console.log(`${chalk.blue(`  |  ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.green(route))
   if(!handler) {
     console.log(`${chalk.red(`|   ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.red(route))
@@ -65,6 +70,7 @@ module.exports = {
       })
       server.on('close', function() {
         console.log(`${chalk.blue('Sylph ')}${chalk.red('Stopping')}`)
+        return;
       });
       
       process.on('SIGINT', function() {
