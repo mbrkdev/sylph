@@ -12,7 +12,7 @@ let state = {};
 
 let app = express();
 app.disable('x-powered-by');
-app.use(express.static(__dirname + '/server/public'))
+app.use(express.static(process.cwd() + '/server/public'))
 console.clear()
 console.log(`${chalk.blue('Sylph')} Engine Starting`)
 
@@ -29,7 +29,7 @@ function setRoute(path) {
   if((path.includes('\\get\\'))) type = 'get';
   if((path.includes('\\post\\'))) type = 'post';
   // Resolve handler
-  const routePath = `${__dirname}/${path}`;
+  const routePath = `${process.cwd()}/${path}`;
   console.log(routePath)
   const {handler, middleware} = require(routePath)
   // Route Normalisation
