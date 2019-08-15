@@ -43,11 +43,11 @@ function setRoute(path) {
   .replace('_', ':') // Underscore to colon (for dynamic routes)
   
   let route = `/${cleanRoute}`;
-  console.log(path)
-  console.log(type)
-  console.log(routePath)
-  console.log(route)
-  console.log(cleanRoute)
+  // console.log(path)
+  // console.log(type)
+  // console.log(routePath)
+  // console.log(route)
+  // console.log(cleanRoute)
   console.log(`${chalk.blue(`  |  ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.green(route))
   if(!handler) {
     console.log(`${chalk.red(`|   ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.red(route))
