@@ -60,6 +60,9 @@ function setRoute(path) {
 module.exports = {
   app,
   state,
+  log: (prefix, message, type) => {
+    console.log(`${chalk.blue(`  |  ${spacer(prefix.toUpperCase(), 5)} >`)}`, chalk[type === 'error' ? 'red' : type === 'success' ? 'green':'blue'](message))
+  },
   expand: (functionality) => {
     functionality.map(f => {
       app.use(f)
