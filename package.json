@@ -1,12 +1,13 @@
 {
   "name": "sylph",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "sylph.js",
   "license": "UNLICENSED",
   "dependencies": {
-    "chalk": "^2.4.2",
+    "0http": "^1.2.3",
     "chokidar": "^3.0.2",
-    "express": "^4.17.1",
-    "express-async-handler": "^1.1.4"
-  }
+    "nano-rgb": "^1.1.0",
+    "uWebSockets.js": "uNetworking/uWebSockets.js#v15.11.0"
+  },
+  "devDependencies": {}
 }

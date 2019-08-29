@@ -1,89 +1,100 @@
-const express = require('express')
+// Imports
+const { mix } = require('nano-rgb')
 const chokidar = require('chokidar');
-const chalk = require('chalk');
-const asyncHandler = require('express-async-handler')
+const cero = require('0http')
+const low = require('0http/lib/server/low')
 
+const path = require('path');
+const fs = require('fs')
+
+const { version } = require('./package.json');
+const { spacer, theme, log } = require('./utils')
+
+// Initialization
 const watcher = chokidar.watch(['server/get', 'server/post']);
+const { router, server } = cero({
+  router: require('0http/lib/router/sequential')(),
+  server: low()
+})
 
-const version = '1.0.0'
+// Application Variables
+let routes = { GET: {}, POST: {} }
+  // Functions
 
-let routes = { get: {},  post: {} }
-let state = {};
-
-let app = express();
-app.disable('x-powered-by');
-app.use(express.static(process.cwd() + '/server/public'))
+// App Starts
 console.clear()
-console.log(`${chalk.blue('Sylph')} Engine Starting`)
+console.log(`${mix(theme.blue,'Sylph')} Engine Starting`)
 
-function spacer (message, length) {
-  let _r = message
-  while (_r.length < length) _r += ' '
-  return _r
-}
+// Default Favicon Handling
+let favicon;
+const faviconPath = path.join(__dirname, 'server/public/favicon.ico')
+const fallback = path.join(__dirname, 'server/public/favicon.ico')
+const fav = fs.existsSync(faviconPath) ? faviconPath : fallback;
+fs.readFile(fav, (err, contents) => {
+  favicon = contents;
+});
+router.get('/favicon.ico', (req, res, next) => {
+  res.end(favicon)
+})
 
 function setRoute(path) {
   // Determine type
   let type = '';
-  if((path.includes('/get/'))) type = 'get';
-  if((path.includes('\\get\\'))) type = 'get';
-  if((path.includes('/post/'))) type = 'post';
-  if((path.includes('\\post\\'))) type = 'post';
+  if ((path.match(/[\\|/]get[\\|/]/))) type = 'GET';
+  if ((path.match(/[\\|/]post[\\|/]/))) type = 'POST';
   // Resolve handler
   const routePath = `${process.cwd()}/${path}`;
-  const {handler, middleware} = require(routePath)
-  // Route Normalisation
+  const { handler, middleware } = require(routePath)
+    // Route Normalization
   const cleanRoute = path
-  .replace(/server\/(?:get|post)\/(.+).js/gi, '$1') // Strip all but path
-  .replace(/server\\(?:get|post)\\(.+).js/gi, '$1') // Strip all but path
-  .replace('\\', '/') // Backslash to forward slash
-  .replace('index', '') // Change index to nothing
-  .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
-  .replace(' ', '-') // Spaces to dashes
-  .replace('_', ':') // Underscore to colon (for dynamic routes)
-  
+    .replace(/server[\\|/](?:get|post)[\\|/](.+).js/gi, '$1') // Strip all but path
+    .replace('\\', '/') // Backslash to forward slash
+    .replace('index', '') // Change index to nothing
+    .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
+    .replace(' ', '-') // Spaces to dashes
+    .replace('_', ':') // Underscore to colon (for dynamic routes)
+
   let route = `/${cleanRoute}`;
-  // console.log(path)
-  // console.log(type)
-  // console.log(routePath)
-  // console.log(route)
-  // console.log(cleanRoute)
-  console.log(`${chalk.blue(`  |  ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.green(route))
-  if(!handler) {
-    console.log(`${chalk.red(`|   ${spacer(type.toUpperCase(), 5)} >`)}`, chalk.red(route))
+
+  if (!handler) {
+    log(type, route, 'error')
     return;
   }
+  log(type, route, 'success')
   routes[type][route] = handler;
-  app[type](route,middleware || [], asyncHandler(handler))
+  router.on(type, route, async(req, res) => {
+    try {
+      await handler(req, res)
+    } catch (error) {
+      log(type, route + '| ERROR', 'error')
+      console.log(error)
+    }
+  })
+}
+
+function expand(functionality) {
+  functionality.map((f, i) => {
+    log('MW', 'Registered x ' + (i + 1))
+    router.use('/', f)
+  })
+}
+
+function start(port, callback) {
+  watcher
+    .on('add', setRoute)
+    .on('ready', () => {
+      server.listen(port, (socket) => {
+        if (socket) {
+          console.log(`${mix(theme.blue,'Sylph ' + mix(theme.yellow,version))} listening on port ${mix(theme.blue,port)}`)
+        }
+      })
+    })
 }
 
 module.exports = {
-  app,
-  state,
-  log: (prefix, message, type) => {
-    console.log(`${chalk.blue(`  |  ${spacer(prefix.toUpperCase(), 5)} >`)}`, chalk[type === 'error' ? 'red' : type === 'success' ? 'green':'blue'](message))
-  },
-  expand: (functionality) => {
-    functionality.map(f => {
-      app.use(f)
-    })
-  },
-  start: (port, callback) => {
-    watcher
-    .on('add', setRoute)
-    .on('ready', () => {
-      const server = app.listen(port, () => {
-        console.log(`${chalk.blue('Sylph ' + chalk.bold(version))} listening on port ${chalk.blue(port)}`)
-        if(callback) callback()
-      })
-      server.on('close', function() {
-        console.log(`${chalk.blue('Sylph ')}${chalk.red('Stopping')}`)
-        return;
-      });
-      
-      process.on('SIGINT', function() {
-        server.close();
-      });
-    })
-  }
+  server,
+  router,
+  log,
+  expand,
+  start
 };
