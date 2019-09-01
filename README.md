@@ -2,11 +2,11 @@
 
 ## What is Sylph?
 
-It's an 0http wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default.
+It's a nanoexpress wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default.
 
 ## Getting Started
 
-First make sure there is a ```server``` folder in the same directory as your entry point (typically ```main.js```). Inside that folder create ```get```, ```post``` and ```public```.
+First make sure there is a ```server``` folder in the same directory as your entry point (typically ```main.js```). Inside that folder create ```get```.
 
 Add an ```index.js``` route inside the ```get``` folder and copy the basic [GET Example](#get-example) below.
 
@@ -18,7 +18,7 @@ const sylph = require('sylph');
 sylph.start(8081);
 ```
 
-And you're done! Optionally after the specified port you can add a callback. 
+Optionally after the specified port you can add a callback if you need to run something after the server is initialised. 
 
 Run the code with:
 
@@ -26,12 +26,12 @@ Run the code with:
 node ./main.js
 ```
 
-This should scan your server directory, parse all of the routes and create their endpoints. If you access the Sylph server by going to localhost:8081 (or whatever port you chose) then you should see ```'OK'```
+And you're done! This should scan your server directory, parse all of the routes and create their endpoints. If you access the Sylph server by going to localhost:8081 (or whatever port you chose) then you should see ```'OK'```
 
 ## Things you should know
 
 - All routes are handled asynchronously
-- Sylph is currently undergoing a transition from being Express based to being based around 0http. Expect breaking changes until release.
+- Favicon.ico is served manually if not specified (to avoid double requests on dynamic routes)
 
 ## File Structure
 
@@ -55,7 +55,9 @@ In the example above, the ```server``` directory acts as the root node in the fi
 
 Subfolders also generate endpoints successfully. ```~/server/get/auth/logout.js``` is the registered GET handler for ```auth/logout``` for example.
 
-The ```utils```, ```middleware``` folders are ignored by the route builder that only looks for ```get || post```. Additionally only the ```public``` folder is required (even if it's empty), the others are just here for organisation of code.
+The ```middleware``` folder is special, all of the files you add inside here are available as strings inside the middleware export array. See [Middleware](#middleware) for more details.
+
+The ```utils``` folder is ignored by the route builder so you can add shared code here.
 
 ## About Transformations
 
@@ -63,11 +65,11 @@ The routes go through multiple transformation steps to get from the filesystem p
 ```js
 path
   // Strip all but path
-  .replace(/server[\\|/](?:get|post)[\\|/](.+).js/gi, '$1') 
+  .replace(/\w+[\\|/](.+).js/gi, '$1')
+  // Change index.js to just .js
+  .replace('index.js', '.js') 
   // Backslash to forward slash
   .replace('\\', '/') 
-  // Change index to nothing
-  .replace('index', '') 
   // Remove ending slash (for xx/index)
   .replace(/\/$/gi, '') 
   // Spaces to dashes
@@ -76,7 +78,15 @@ path
   .replace('_', ':') 
 ```
 
-## About Middleware
+Index is required for middleware, in the case of 'index' middleware it would otherwise be removed. Another replace is run after middleware is processed:
+
+```js
+path
+  // Removes '/index' only if it's at the end of a route
+  .replace(/\/index$/, '') 
+```
+
+## Middleware
 
 Globally there is a handy Sylph method that allows the addition of any necessary middleware called ```expand```. Here is an example of using ```expand``` to handle CORS:
 
@@ -95,13 +105,12 @@ sylph.expand([
 
 In addition to the global middleware, per-route middleware can be included by simply exporting an array of express compatible middleware along with the handler:
 ```js
-// Currently not handled, see issue!
 module.exports.middleware = [/*My Middleware*/]
 
 module.exports.handler = async (req, res, next) => {}
 ```
 
-All middleware is a function with the signature:
+All middleware is a function with the signature, next() has no function in route defined middleware but for compatibility it's still best to follow this pattern:
 
 ```js
 (req, res, next) => {
@@ -128,13 +137,45 @@ module.exports.middleware = [
 ]
 ```
 
+There are 'keyed' middleware, these are globally defined under your ```middleware``` folder and launched simply by using their name in the export array:
+
+```js
+module.exports.middleware = [
+  'route-log-start', 'isAuthenticated', 'route-log-end'
+]
+```
+
+Here's an example of all three types of middleware working happily together:
+```js
+const {isAuthenticated} = require('../middleware')
+module.exports.middleware = [
+  // Keyed
+  'route-log-start',
+  // Import
+  isAuthenticated,
+  // Functional
+  (req, res, next) => { 
+    console.log(`Custom Log: User ${req.user.email} Authenticated!`)
+    next();
+  }
+]
+```
+
+## Application Options
+
+```js
+let options = {
+  showMiddleware: false, // Verbosity flag for middleware on console output
+}
+```
+
 ## GET Example
 
 ```js
 // ~/server/get/index.js
 // GET /
 module.exports.handler = async (req, res, next) => {
-  res.status(200).send('OK')
+  res.end('OK')
 }
 ```
 
@@ -148,7 +189,7 @@ const {isAuthenticated} = require('../middleware')
 module.exports.middleware = [isAuthenticated]
 
 module.exports.handler = async (req, res, next) => {
-  res.status(200).send('OK')
+  res.end('OK')
 }
 
 ```
@@ -159,7 +200,7 @@ module.exports.handler = async (req, res, next) => {
 // ~/server/get/_id.js
 // GET /:id
 module.exports.handler = async (req, res, next) => {
-  res.status(200).send(req.params.id)
+  res.send(req.params.id)
 }
 
 ```

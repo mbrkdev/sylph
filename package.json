@@ -1,13 +1,20 @@
 {
   "name": "sylph",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "sylph.js",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "eslint --init"
+  },
   "dependencies": {
-    "0http": "^1.2.3",
-    "chokidar": "^3.0.2",
     "nano-rgb": "^1.1.0",
+    "nanoexpress": "^1.2.5-pro",
+    "readdirp": "^3.1.2",
     "uWebSockets.js": "uNetworking/uWebSockets.js#v15.11.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  }
 }
