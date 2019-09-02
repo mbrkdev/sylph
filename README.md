@@ -177,6 +177,8 @@ let options = {
   showMiddleware: false, 
   // Base path to crawl for server routes
   basePath: 'server',
+  // Should the app clear the terminal when it starts?
+  clear: true',
 }
 ```
 

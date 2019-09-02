@@ -14,13 +14,11 @@ const middlewares = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
+  clear: true,
 };
 
 const app = nanoexpress();
 
-// App Starts
-console.clear();
-console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
 
 // Serve Public Folder
 // const publicFolder = path.join(__dirname, `${options.basePath}/public`);
@@ -98,6 +96,11 @@ function expand(functionality) {
 }
 
 function start(port, callback) {
+  // App Starts
+  if (options.clear) {
+    console.clear();
+  }
+  console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
   readdirp(options.basePath, {
     fileFilter: '*.js',
     directoryFilter: ['!public', '!*utils'],
