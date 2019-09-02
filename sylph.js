@@ -11,6 +11,7 @@ const { theme, log } = require('./utils');
 
 // Application Variables
 const app = new App();
+const dir = process.cwd();
 
 const middlewares = {};
 let options = {
@@ -20,39 +21,64 @@ let options = {
   origins: 'http://localhost:3000',
   headers: {},
   methods: '*',
+  verbose: false,
 };
 
 let headers = {
   Connection: 'keep-alive',
 };
 
-app.options('/*', (res) => {
-  writeHeaders(res, headers);
-  writeHeaders(res, 'access-control-allow-headers', 'content-type');
-  res.end();
-});
-
-// Serve Public Folder
-const publicDir = path.join(__dirname, options.basePath, 'public');
-if (fs.existsSync(publicDir)) {
-  app.folder('', publicDir, {
-    headers,
-    compress: true,
+function setupApplication() {
+  app.options('/*', (res) => {
+    writeHeaders(res, headers);
+    writeHeaders(res, 'access-control-allow-headers', 'content-type');
+    res.end();
   });
-}
 
-// Default Favicon Handling
-const faviconPath = path.join(__dirname, `${options.basePath}/public/favicon.ico`);
-const fallback = './favicon.ico';
-const fav = fs.existsSync(faviconPath) ? faviconPath : fs.existsSync(fallback) ? fallback : null;
-if (fav) {
-  const favicon = fs.readFileSync(fav);
-  app.get('/favicon.ico', async (res, req) => {
-    res.onAborted((err) => {
-      if (err) throw Error(err);
+  // Serve Public Folder
+  const publicDir = path.join(dir, options.basePath, 'public');
+  const publicExists = fs.existsSync(publicDir);
+  if (options.verbose) {
+    log('LOG', `Public ${publicExists ? 'Exists' : 'Doesn\'t Exist @'}`, publicExists ? 'success' : 'error');
+    if (!publicExists) {
+      log('LOG', publicDir, 'error');
+    }
+  }
+  if (publicExists) {
+    app.folder('', publicDir, {
+      headers,
+      compress: true,
     });
-    res.end(favicon);
-  });
+  }
+
+  // Default Favicon Handling
+  const faviconPath = path.join(dir, `${options.basePath}/public/favicon.ico`);
+  const fallback = path.join(__dirname, 'favicon.ico');
+  const favExists = fs.existsSync(faviconPath);
+  const fallbackExists = fs.existsSync(fallback);
+
+  const fav = favExists ? faviconPath : fallbackExists ? fallback : null;
+
+  if (options.verbose) {
+    log('LOG', `Public Favicon ${favExists ? 'Exists' : 'Doesn\'t Exist'}`, favExists ? 'success' : 'error');
+    log('LOG', `Fallback Favicon ${fallbackExists ? 'Exists' : 'Doesn\'t Exist'}`, fallbackExists ? 'success' : 'error');
+    if (!fav) {
+      log('LOG', 'No Favicon Available', 'error');
+      log('LOG', `FV: ${faviconPath}`, 'error');
+      log('LOG', `FB: ${fallback}`, 'error');
+    } else {
+      log('LOG', 'Favicon Resolved', 'success');
+    }
+  }
+  if (fav) {
+    const favicon = fs.readFileSync(fav);
+    app.get('/favicon.ico', async (res, req) => {
+      res.onAborted((err) => {
+        if (err) throw Error(err);
+      });
+      res.end(favicon);
+    });
+  }
 }
 
 function setRoute(filePath) {
@@ -123,6 +149,7 @@ function start(port, callback) {
     console.clear();
   }
   console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
+  setupApplication();
   readdirp(options.basePath, {
     fileFilter: '*.js',
     directoryFilter: ['!public', '!*utils'],
