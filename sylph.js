@@ -10,8 +10,10 @@ const { version } = require('./package.json');
 const { theme, log } = require('./utils');
 
 // Application Variables
+const middlewares = {};
 let options = {
   showMiddleware: false,
+  basePath: 'server',
 };
 
 const app = nanoexpress();
@@ -20,11 +22,14 @@ const app = nanoexpress();
 console.clear();
 console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
 
-
-const basePath = 'server';
+// Serve Public Folder
+const publicFolder = path.join(__dirname, `${options.basePath}/public`);
+if (fs.existsSync(publicFolder)) {
+  app.use(require('nanoexpress/build/static.js')(publicFolder));
+}
 
 // Default Favicon Handling
-const faviconPath = path.join(__dirname, `${basePath}/public/favicon.ico`);
+const faviconPath = path.join(__dirname, `${options.basePath}/public/favicon.ico`);
 const fallback = path.join(__dirname, 'favicon.ico');
 const fav = fs.existsSync(faviconPath) ? faviconPath : fs.existsSync(fallback) ? fallback : null;
 if (!fav) {
@@ -33,8 +38,6 @@ if (!fav) {
     res.end(favicon);
   });
 }
-
-const middlewares = {};
 
 function setRoute(filePath) {
   // Determine type
@@ -49,7 +52,7 @@ function setRoute(filePath) {
     .replace('_', ':'); // Underscore to colon (for dynamic routes)
   let route = `/${cleanRoute}`;
 
-  const routePath = `${process.cwd()}/${basePath}/${filePath}`;
+  const routePath = `${process.cwd()}/${options.basePath}/${filePath}`;
 
   // Resolve Middleware
   if (type === 'middleware') {
@@ -96,7 +99,7 @@ function expand(functionality) {
 
 function start(port, callback, appOptions) {
   if (appOptions) options = appOptions;
-  readdirp(basePath, {
+  readdirp(options.basePath, {
     fileFilter: '*.js',
     directoryFilter: ['!public', '!*utils'],
   })
