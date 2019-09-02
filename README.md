@@ -227,7 +227,7 @@ sylph.options({
 ```js
 // ~/server/get/index.js
 // GET /
-module.exports.handler = async (req, res, next) => {
+module.exports.handler = async (req, res) => {
   res.end('OK')
 }
 ```
@@ -241,7 +241,7 @@ const {isAuthenticated} = require('../middleware')
 
 module.exports.middleware = [isAuthenticated]
 
-module.exports.handler = async (req, res, next) => {
+module.exports.handler = async (req, res) => {
   res.end('OK')
 }
 
@@ -252,7 +252,7 @@ module.exports.handler = async (req, res, next) => {
 ```js
 // ~/server/get/_id.js
 // GET /:id
-module.exports.handler = async (req, res, next) => {
+module.exports.handler = async (req, res) => {
   res.send(req.params.id)
 }
 
