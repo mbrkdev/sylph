@@ -1,6 +1,6 @@
 // Imports
 const { mix } = require('nano-rgb');
-const nanoexpress = require('nanoexpress');
+const { App, writeHeaders } = require('@sifrr/server');
 
 const path = require('path');
 const fs = require('fs');
@@ -10,21 +10,33 @@ const { version } = require('./package.json');
 const { theme, log } = require('./utils');
 
 // Application Variables
+const app = new App();
+
 const middlewares = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
   clear: true,
+  origins: 'http://localhost:3000',
+  headers: {},
+  methods: '*',
 };
 
-const app = nanoexpress();
+let headers = {
+  Connection: 'keep-alive',
+};
 
+app.options('/*', (res) => {
+  writeHeaders(res, headers);
+  writeHeaders(res, 'access-control-allow-headers', 'content-type');
+  res.end();
+});
 
 // Serve Public Folder
-// const publicFolder = path.join(__dirname, `${options.basePath}/public`);
-// if (fs.existsSync(publicFolder)) {
-//   app.use(require('nanoexpress/build/static.js')(publicFolder));
-// }
+app.folder('', path.join(__dirname, options.basePath, 'public'), {
+  headers,
+  compress: true,
+});
 
 // Default Favicon Handling
 const faviconPath = path.join(__dirname, `${options.basePath}/public/favicon.ico`);
@@ -32,7 +44,10 @@ const fallback = './favicon.ico';
 const fav = fs.existsSync(faviconPath) ? faviconPath : fs.existsSync(fallback) ? fallback : null;
 if (fav) {
   const favicon = fs.readFileSync(fav);
-  app.get('/favicon.ico', async (req, res) => {
+  app.get('/favicon.ico', async (res, req) => {
+    res.onAborted((err) => {
+      if (err) throw Error(err);
+    });
     res.end(favicon);
   });
 }
@@ -72,7 +87,9 @@ function setRoute(filePath) {
     return;
   }
   log(type, route, 'success');
-  app[type](route, async (req, res) => {
+  app[type](route, async (res, req) => {
+    writeHeaders(res, headers);
+
     try {
       if (middleware) {
         middleware.map(async (m) => {
@@ -109,20 +126,23 @@ function start(port, callback) {
       setRoute(entry.path);
     })
     .on('end', async () => {
-      // Because of a crazy error that is nothing to do with this app.
-      console.done = () => {};
       try {
-        await app.listen(port, '0.0.0.0');
-        console.log(`${mix(theme.blue, `Sylph ${mix(theme.yellow, version)}`)} listening on port ${mix(theme.blue, port)}`);
-        if (callback) callback();
+        app.listen(port, () => {
+          console.log(`${mix(theme.blue, `Sylph ${mix(theme.yellow, version)}`)} listening on port ${mix(theme.blue, port)}`);
+          if (callback) callback();
+        });
       } catch (error) {
-        console.log('error');
+        console.log(error);
       }
     });
 }
 
 function setOptions(opts) {
   options = { ...options, ...opts };
+  headers = {
+    'access-control-allow-origin': options.origins,
+    'access-control-allow-methods': options.methods,
+  };
 }
 
 module.exports = {

@@ -2,7 +2,9 @@
 
 ## What is Sylph?
 
-It's a nanoexpress wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default.
+A route based web server framework, think Next/Nuxt but for server routes instead of application pages!
+
+It's a [Sifrr Server](https://github.com/sifrr/sifrr/tree/master/packages/server/sifrr-server) wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default while providing a familiar developer experience.
 
 ## Getting Started
 
@@ -94,20 +96,43 @@ path
   .replace(/\/index$/, '') 
 ```
 
-## Middleware
+## CORS
 
-Globally there is a handy Sylph method that allows the addition of any necessary middleware called ```expand```. Here is an example of using ```expand``` to handle CORS:
+CORS is dealt with by default, this is because it's often the biggest headache when trying to get something going quickly offline, and important for security when you're ready for production. The Origins and Methods allowed can be changed inside the Sylph Options configuration, default settings are below:
 
 ```js
-const cors = require('cors')
+// Default
+let options = {
+  // ... other options
+  origins: ['http://localhost:3000'],
+  methods: '*',
+}
+```
 
-sylph.router.options('*', cors())
+It is relatively important to change your Origins before you deploy, localhost:3000 is the default for rapid prototyping but you may not want localhost to be able to access your server at all!
 
+## Custom Headers
+
+You can add custom headers in the same way as configuring CORS, simply use the ```headers``` property in the ```options``` function!
+
+```js
+sylph.options({
+  headers: {
+    'X-My-Custom-Header': 32
+  }
+})
+```
+
+## Middleware
+
+Globally there is a handy Sylph method that allows the addition of any necessary middleware called ```expand```. This can easily be used to add global level middleware to the application.
+
+```js
 sylph.expand([
-  cors({
-    origin: ['http://localhost:3000'],
-    credentials: true
-  })
+  (req, res, next) => {
+    req.params && console.log(req.params)
+    next();
+  }
 ])
 ```
 
@@ -179,6 +204,11 @@ let options = {
   basePath: 'server',
   // Should the app clear the terminal when it starts?
   clear: true',
+  // CORS Origins & Allowed Methods
+  origins: ['http://localhost:3000'],
+  methods: '*',
+  // Global Headers
+  headers: {}
 }
 ```
 
@@ -189,6 +219,8 @@ sylph.options({
   showMiddleware: true,
 });
 ```
+
+# Examples
 
 ## GET Example
 
