@@ -23,16 +23,16 @@ console.clear();
 console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
 
 // Serve Public Folder
-const publicFolder = path.join(__dirname, `${options.basePath}/public`);
-if (fs.existsSync(publicFolder)) {
-  app.use(require('nanoexpress/build/static.js')(publicFolder));
-}
+// const publicFolder = path.join(__dirname, `${options.basePath}/public`);
+// if (fs.existsSync(publicFolder)) {
+//   app.use(require('nanoexpress/build/static.js')(publicFolder));
+// }
 
 // Default Favicon Handling
 const faviconPath = path.join(__dirname, `${options.basePath}/public/favicon.ico`);
-const fallback = path.join(__dirname, 'favicon.ico');
+const fallback = './favicon.ico';
 const fav = fs.existsSync(faviconPath) ? faviconPath : fs.existsSync(fallback) ? fallback : null;
-if (!fav) {
+if (fav) {
   const favicon = fs.readFileSync(fav);
   app.get('/favicon.ico', async (req, res) => {
     res.end(favicon);

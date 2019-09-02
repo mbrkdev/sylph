@@ -6,6 +6,11 @@ It's a nanoexpress wrapper that takes many of the setup steps out, builds best p
 
 ## Getting Started
 
+```bash
+yarn add sylph-server
+# npm i sylph-server
+```
+
 First make sure there is a ```server``` folder in the same directory as your entry point (typically ```main.js```). Inside that folder create ```get```.
 
 Add an ```index.js``` route inside the ```get``` folder and copy the basic [GET Example](#get-example) below.
@@ -13,7 +18,7 @@ Add an ```index.js``` route inside the ```get``` folder and copy the basic [GET 
 Back in ```main.js```, import/require Sylph and then call the ```sylph.start(/*port*/)``` method:
 
 ```js
-const sylph = require('sylph');
+const sylph = require('sylph-server');
 
 sylph.start(8081);
 ```
@@ -47,8 +52,11 @@ server/
 │   └── login.js
 ├── utils/
 │   └── display.js
-└── middleware/
-    └── index.js
+├── middleware/
+│   └── index.js
+└── public/
+    ├── index.html
+    └── favicon.ico
 ```
 
 In the example above, the ```server``` directory acts as the root node in the file system, endpoints are created as individual .js files under the ```post``` and ```get``` directories.
