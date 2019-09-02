@@ -33,10 +33,13 @@ app.options('/*', (res) => {
 });
 
 // Serve Public Folder
-app.folder('', path.join(__dirname, options.basePath, 'public'), {
-  headers,
-  compress: true,
-});
+const publicDir = path.join(__dirname, options.basePath, 'public');
+if (fs.existsSync(publicDir)) {
+  app.folder('', publicDir, {
+    headers,
+    compress: true,
+  });
+}
 
 // Default Favicon Handling
 const faviconPath = path.join(__dirname, `${options.basePath}/public/favicon.ico`);
