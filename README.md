@@ -173,8 +173,19 @@ module.exports.middleware = [
 
 ```js
 let options = {
-  showMiddleware: false, // Verbosity flag for middleware on console output
+  // Verbosity flag for middleware on console output
+  showMiddleware: false, 
+  // Base path to crawl for server routes
+  basePath: 'server',
 }
+```
+
+To change options you simply pass an object of new option values that is merged with the defaults (above). For example:
+
+```js
+sylph.options({
+  showMiddleware: true,
+});
 ```
 
 ## GET Example

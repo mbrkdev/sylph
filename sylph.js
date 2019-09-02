@@ -97,8 +97,7 @@ function expand(functionality) {
   });
 }
 
-function start(port, callback, appOptions) {
-  if (appOptions) options = appOptions;
+function start(port, callback) {
   readdirp(options.basePath, {
     fileFilter: '*.js',
     directoryFilter: ['!public', '!*utils'],
@@ -119,8 +118,13 @@ function start(port, callback, appOptions) {
     });
 }
 
+function setOptions(opts) {
+  options = { ...options, ...opts };
+}
+
 module.exports = {
   app,
+  options: setOptions,
   log,
   expand,
   start,
