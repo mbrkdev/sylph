@@ -1,8 +1,8 @@
 # Sylph
 
-## What is Sylph?
-
 A route based web server framework, think Next/Nuxt but for server routes instead of application pages!
+
+## What is Sylph?
 
 It's a [Sifrr Server](https://github.com/sifrr/sifrr/tree/master/packages/server/sifrr-server) wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default while providing a familiar developer experience.
 

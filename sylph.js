@@ -91,8 +91,11 @@ function setRoute(filePath) {
   }
   log(type, route, 'success');
   app[type](route, async (res, req) => {
+    console.log(req, res);
     writeHeaders(res, headers);
-
+    res.onAborted((err) => {
+      if (err) throw Error(err);
+    });
     try {
       if (middleware) {
         middleware.map(async (m) => {
