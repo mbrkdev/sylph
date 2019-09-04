@@ -1,10 +1,12 @@
 # Sylph
 
-A route based web server framework, think Next/Nuxt but for server routes instead of application pages!
+A route based web server framework, think Next/Nuxt but for server routes instead of application pages! The goal is to create an amazing experience for developers looking to rapidly hack on new ideas without having to go through environment setup.
 
-## What is Sylph?
+## What *Exactly* is Sylph?
 
-It's a [Sifrr Server](https://github.com/sifrr/sifrr/tree/master/packages/server/sifrr-server) wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default while providing a familiar developer experience.
+It's an express wrapper that takes many of the setup steps out, builds best practices into the core when possible and was created to be both modular and easily extendable by default while providing a familiar developer experience.
+
+As it is built on top of Express, anything that can be done in Express can be done in Sylph... [Global/Local/One-Off Middleware](#middleware) ✔ [CORS](#cors) ✔ Static Serving ✔. It even comes with it's own [logging](#logging) function.
 
 ## Getting Started
 
@@ -98,29 +100,14 @@ path
 
 ## CORS
 
-CORS is dealt with by default, this is because it's often the biggest headache when trying to get something going quickly offline, and important for security when you're ready for production. The Origins and Methods allowed can be changed inside the Sylph Options configuration, default settings are below:
+CORS is dealt with by default, this is because it's often the biggest headache when trying to get an idea going quickly, and important for security when you're ready for production. The Origins can be changed inside the Sylph Options configuration, the default setting is below:
 
 ```js
 // Default
 let options = {
   // ... other options
   origins: ['http://localhost:3000'],
-  methods: '*',
 }
-```
-
-It is relatively important to change your Origins before you deploy, localhost:3000 is the default for rapid prototyping but you may not want localhost to be able to access your server at all!
-
-## Custom Headers
-
-You can add custom headers in the same way as configuring CORS, simply use the ```headers``` property in the ```options``` function!
-
-```js
-sylph.options({
-  headers: {
-    'X-My-Custom-Header': 32
-  }
-})
 ```
 
 ## Middleware
@@ -204,11 +191,8 @@ let options = {
   basePath: 'server',
   // Should the app clear the terminal when it starts?
   clear: true',
-  // CORS Origins & Allowed Methods
+  // CORS Origins
   origins: ['http://localhost:3000'],
-  methods: '*',
-  // Global Headers
-  headers: {}
 }
 ```
 
@@ -220,6 +204,35 @@ sylph.options({
 });
 ```
 
+## Logging
+
+Sylph includes a flexible logging function, currently this is only useful during development but will soon be able to automatically utilise powerful production logging using Winston/Bunyan by default.
+
+```js
+const {log} = require('sylph-server');
+
+// Prefix   -    For example log/error/post/get, what appears before > in the logs.
+// Message  -    The actual message to display.
+// Type     -    'success' for green, 'error' for red or blank for blue.
+log(prefix, message, type)
+
+// Error message
+log('error', 'Could not connect :C', 'error')
+// Output: (Red)
+//  |  ERROR > Could not connect :C
+
+// Success message
+log('event', `User ${user.name} logged in!`, 'success')
+// Output: (Green)
+//  |  EVENT > User Sylph logged in!
+
+// General message
+log('log', `Processing took ${time}ms`)
+// Output: (Blue)
+//  |  LOG   > Processing took 206ms
+
+```
+
 # Examples
 
 ## GET Example
@@ -228,7 +241,7 @@ sylph.options({
 // ~/server/get/index.js
 // GET /
 module.exports.handler = async (req, res) => {
-  res.end('OK')
+  res.status(200).send('OK')
 }
 ```
 
@@ -242,7 +255,7 @@ const {isAuthenticated} = require('../middleware')
 module.exports.middleware = [isAuthenticated]
 
 module.exports.handler = async (req, res) => {
-  res.end('OK')
+  res.status(200).send('OK')
 }
 
 ```
@@ -253,7 +266,7 @@ module.exports.handler = async (req, res) => {
 // ~/server/get/_id.js
 // GET /:id
 module.exports.handler = async (req, res) => {
-  res.send(req.params.id)
+  res.status(200).send(req.params.id)
 }
 
 ```

@@ -1,16 +1,17 @@
 // Imports
 const { mix } = require('nano-rgb');
-const { App, writeHeaders } = require('@sifrr/server');
+const express = require('express');
 
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 const readdirp = require('readdirp');
 
 const { version } = require('./package.json');
 const { theme, log } = require('./utils');
 
 // Application Variables
-const app = new App();
+const app = express();
 const dir = process.cwd();
 
 const middlewares = {};
@@ -18,23 +19,11 @@ let options = {
   showMiddleware: false,
   basePath: 'server',
   clear: true,
-  origins: 'http://localhost:3000',
-  headers: {},
-  methods: '*',
+  origins: ['http://localhost:3000'],
   verbose: false,
 };
 
-let headers = {
-  Connection: 'keep-alive',
-};
-
 function setupApplication() {
-  app.options('/*', (res) => {
-    writeHeaders(res, headers);
-    writeHeaders(res, 'access-control-allow-headers', 'content-type');
-    res.end();
-  });
-
   // Serve Public Folder
   const publicDir = path.join(dir, options.basePath, 'public');
   const publicExists = fs.existsSync(publicDir);
@@ -44,12 +33,7 @@ function setupApplication() {
       log('LOG', publicDir, 'error');
     }
   }
-  if (publicExists) {
-    app.folder('', publicDir, {
-      headers,
-      compress: true,
-    });
-  }
+  if (publicExists) app.use(express.static(publicDir));
 
   // Default Favicon Handling
   const faviconPath = path.join(dir, `${options.basePath}/public/favicon.ico`);
@@ -71,14 +55,34 @@ function setupApplication() {
     }
   }
   if (fav) {
-    const favicon = fs.readFileSync(fav);
-    app.get('/favicon.ico', async (res, req) => {
-      res.onAborted((err) => {
-        if (err) throw Error(err);
-      });
-      res.end(favicon);
+    app.get('/favicon.ico', (req, res) => {
+      res.sendFile(fav);
     });
   }
+}
+
+function resolveHandler(routePath, type, route) {
+  // Resolve handler
+  const { handler, middleware } = require(routePath);
+  if (!handler) {
+    log(type, route, 'error');
+    return;
+  }
+  log(type, route, 'success');
+  app[type](route, async (req, res) => {
+    try {
+      if (middleware) {
+        middleware.map(async (m) => {
+          if (typeof m === 'function') await m(req, res, () => {});
+          else await middlewares[m](req, res, () => {});
+        });
+      }
+      await handler(req, res);
+    } catch (error) {
+      log(type, `${route}| ERROR`, 'error');
+      console.log(error);
+    }
+  });
 }
 
 function setRoute(filePath) {
@@ -109,31 +113,7 @@ function setRoute(filePath) {
   // Removes 'index' only if it's at the end of a route
   route = route.replace(/[\\|/]index$/, '');
 
-  // Resolve handler
-  const { handler, middleware } = require(routePath);
-  if (!handler) {
-    log(type, route, 'error');
-    return;
-  }
-  log(type, route, 'success');
-  app[type](route, async (res, req) => {
-    writeHeaders(res, headers);
-    res.onAborted((err) => {
-      if (err) throw Error(err);
-    });
-    try {
-      if (middleware) {
-        middleware.map(async (m) => {
-          if (typeof m === 'function') await m(req, res, () => {});
-          else await middlewares[m](req, res, () => {});
-        });
-      }
-      await handler(req, res);
-    } catch (error) {
-      log(type, `${route}| ERROR`, 'error');
-      console.log(error);
-    }
-  });
+  resolveHandler(routePath, type, route);
 }
 
 function expand(functionality) {
@@ -171,10 +151,20 @@ function start(port, callback) {
 
 function setOptions(opts) {
   options = { ...options, ...opts };
-  headers = {
-    'access-control-allow-origin': options.origins,
-    'access-control-allow-methods': options.methods,
+  const corsOptions = {
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (options.origins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
   };
+
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 }
 
 module.exports = {
