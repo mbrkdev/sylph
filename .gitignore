@@ -3,3 +3,4 @@ server
 .vscode
 main.js
 yarn-error.log
+logs

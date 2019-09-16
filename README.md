@@ -206,30 +206,43 @@ sylph.options({
 
 ## Logging
 
-Sylph includes a flexible logging function, currently this is only useful during development but will soon be able to automatically utilise powerful production logging using Winston/Bunyan by default.
+Sylph includes a flexible logging function, under the hood [Winston](https://github.com/winstonjs/winston) is doing all the heavy lifting. In production there won't be any logs printed to the console, only to the three log files generated when Sylph is first spawned. These log files break into the three categories ```error``` for the most severe issues, ```info``` for everything important you may need to know, and ```all``` for everything else.
+
+Starting in Sylph ```2.1.0``` there are now seven theme colours all indicating a different level of log:
+
+```js
+const theme = {
+  error: rgb(235, 97, 52),
+  warn: rgb(235, 189, 52),
+  info: rgb(52, 177, 235),
+  verbose: rgb(240, 140, 174),
+  debug: rgb(64, 78, 77),
+  silly: rgb(245, 138, 7),
+  success: rgb(52, 235, 155),
+};
+```
+
+Use these theme color keys to define what type of log you're sending to Winston. Traditionally this was just ```error/success``` with omission meaning ```info```. While not sending a value along still assumes ```info```, you now have many more choices for server logging. It's important to note that this disappears completely when in production mode, only ```.log``` files are generated in the ```/logs``` folder.
 
 ```js
 const {log} = require('sylph-server');
 
 // Prefix   -    For example log/error/post/get, what appears before > in the logs.
 // Message  -    The actual message to display.
-// Type     -    'success' for green, 'error' for red or blank for blue.
+// Type     -    See above
 log(prefix, message, type)
 
 // Error message
 log('error', 'Could not connect :C', 'error')
-// Output: (Red)
-//  |  ERROR > Could not connect :C
 
 // Success message
 log('event', `User ${user.name} logged in!`, 'success')
-// Output: (Green)
-//  |  EVENT > User Sylph logged in!
 
 // General message
 log('log', `Processing took ${time}ms`)
-// Output: (Blue)
-//  |  LOG   > Processing took 206ms
+
+// Debug message
+log('log', `${amount} users timed out in the last hour.`, 'debug')
 
 ```
 

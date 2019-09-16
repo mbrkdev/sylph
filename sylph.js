@@ -123,12 +123,13 @@ function expand(functionality) {
   });
 }
 
-function start(port, callback) {
+async function start(port, callback) {
   // App Starts
   if (options.clear) {
     console.clear();
   }
-  console.log(`${mix(theme.blue, 'Sylph')} Engine Starting`);
+  console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
+
   setupApplication();
   readdirp(options.basePath, {
     fileFilter: '*.js',
@@ -140,7 +141,7 @@ function start(port, callback) {
     .on('end', async () => {
       try {
         app.listen(port, () => {
-          console.log(`${mix(theme.blue, `Sylph ${mix(theme.yellow, version)}`)} listening on port ${mix(theme.blue, port)}`);
+          console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
           if (callback) callback();
         });
       } catch (error) {

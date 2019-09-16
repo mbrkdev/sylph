@@ -11,7 +11,8 @@
     "express": "^4.17.1",
     "nano-rgb": "^1.1.0",
     "polka": "^0.5.2",
-    "readdirp": "^3.1.2"
+    "readdirp": "^3.1.2",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^6.3.0",
