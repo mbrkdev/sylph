@@ -129,7 +129,7 @@ async function start(port, callback) {
     console.clear();
   }
   console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
-
+  app.disable('x-powered-by');
   setupApplication();
   readdirp(options.basePath, {
     fileFilter: '*.js',
