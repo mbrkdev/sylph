@@ -22,6 +22,8 @@ const theme = {
 
 const logstamp = Date.now();
 
+let loggerOptions = {};
+
 const sylphLevels = {
   error: 0,
   warn: 1,
@@ -32,27 +34,38 @@ const sylphLevels = {
   success: 6,
 };
 
-const logger = winston.createLogger({
-  levels: sylphLevels,
-  format: combine(timestamp(), json()),
-  transports: [
-    new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-all.log`), level: 'success' }),
-    new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-info.log`), level: 'info' }),
-    new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-error.log`), level: 'error' }),
-  ],
-});
-
+let logger;
 
 function log(prefix, message, type) {
   const logType = type || 'info';
-  logger[logType](`${prefix.toUpperCase()} > ${message}`);
+  if (loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') {
+    logger[logType](`${prefix.toUpperCase()} > ${message}`);
+  }
   if (process.env.NODE_ENV !== 'production') {
     console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 8)} >`)}`, mix(theme[logType], message));
   }
+}
+
+function initLogger(options) {
+  loggerOptions = options;
+  let transports = [];
+  if (loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') {
+    transports = [
+      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-all.log`), level: 'success' }),
+      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-info.log`), level: 'info' }),
+      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-error.log`), level: 'error' }),
+    ];
+  }
+  logger = winston.createLogger({
+    levels: sylphLevels,
+    format: combine(timestamp(), json()),
+    transports,
+  });
 }
 
 module.exports = {
   spacer,
   theme,
   log,
+  initLogger,
 };

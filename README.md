@@ -191,6 +191,8 @@ let options = {
   basePath: 'server',
   // Should the app clear the terminal when it starts?
   clear: true',
+  // Printed file logging in development
+  devLogs: true',
   // CORS Origins
   origins: ['http://localhost:3000'],
 }

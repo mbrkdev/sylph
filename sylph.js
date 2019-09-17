@@ -8,7 +8,7 @@ const cors = require('cors');
 const readdirp = require('readdirp');
 
 const { version } = require('./package.json');
-const { theme, log } = require('./utils');
+const { theme, log, initLogger } = require('./utils');
 
 // Application Variables
 const app = express();
@@ -152,6 +152,7 @@ async function start(port, callback) {
 
 function setOptions(opts) {
   options = { ...options, ...opts };
+  initLogger(options);
   const corsOptions = {
     preflightContinue: false,
     optionsSuccessStatus: 200,
