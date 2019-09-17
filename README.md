@@ -190,9 +190,11 @@ let options = {
   // Base path to crawl for server routes
   basePath: 'server',
   // Should the app clear the terminal when it starts?
-  clear: true',
+  clear: true,
+  // Start silently (no init logging)
+  silent: false,
   // Printed file logging in development
-  devLogs: true',
+  devLogs: true,
   // CORS Origins
   origins: ['http://localhost:3000'],
 }

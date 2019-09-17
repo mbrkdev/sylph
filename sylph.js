@@ -19,6 +19,8 @@ let options = {
   showMiddleware: false,
   basePath: 'server',
   clear: true,
+  silent: false,
+  devLogs: true,
   origins: ['http://localhost:3000'],
   verbose: false,
 };
@@ -27,7 +29,7 @@ function setupApplication() {
   // Serve Public Folder
   const publicDir = path.join(dir, options.basePath, 'public');
   const publicExists = fs.existsSync(publicDir);
-  if (options.verbose) {
+  if (options.verbose && !options.silent) {
     log('LOG', `Public ${publicExists ? 'Exists' : 'Doesn\'t Exist @'}`, publicExists ? 'success' : 'error');
     if (!publicExists) {
       log('LOG', publicDir, 'error');
@@ -43,7 +45,7 @@ function setupApplication() {
 
   const fav = favExists ? faviconPath : fallbackExists ? fallback : null;
 
-  if (options.verbose) {
+  if (options.verbose && !options.silent) {
     log('LOG', `Public Favicon ${favExists ? 'Exists' : 'Doesn\'t Exist'}`, favExists ? 'success' : 'error');
     log('LOG', `Fallback Favicon ${fallbackExists ? 'Exists' : 'Doesn\'t Exist'}`, fallbackExists ? 'success' : 'error');
     if (!fav) {
@@ -65,10 +67,14 @@ function resolveHandler(routePath, type, route) {
   // Resolve handler
   const { handler, middleware } = require(routePath);
   if (!handler) {
-    log(type, route, 'error');
+    if (!options.silent) {
+      log(type, route, 'error');
+    }
     return;
   }
-  log(type, route, 'success');
+  if (!options.silent) {
+    log(type, route, 'success');
+  }
   app[type](route, async (req, res) => {
     try {
       if (middleware) {
@@ -79,7 +85,9 @@ function resolveHandler(routePath, type, route) {
       }
       await handler(req, res);
     } catch (error) {
-      log(type, `${route}| ERROR`, 'error');
+      if (!options.silent) {
+        log(type, `${route}| ERROR`, 'error');
+      }
       console.log(error);
     }
   });
@@ -106,7 +114,7 @@ function setRoute(filePath) {
     const fileName = filePath.replace(/\w+[\\|/](.+).js/gi, '$1')
       .replace(/[\\|/]/, '/');
     middlewares[fileName] = mw;
-    if (options.showMiddleware) { log('Midd', fileName, 'success'); }
+    if (options.showMiddleware && !options.silent) { log('Midd', fileName, 'success'); }
     return;
   }
 
@@ -117,7 +125,7 @@ function setRoute(filePath) {
 }
 
 function expand(functionality) {
-  if (options.showMiddleware) { log('Midd', `Expanded x ${functionality.length}`); }
+  if (options.showMiddleware && !options.silent) { log('Midd', `Expanded x ${functionality.length}`); }
   functionality.map((f) => {
     app.use('/', f);
   });
@@ -128,7 +136,9 @@ async function start(port, callback) {
   if (options.clear) {
     console.clear();
   }
-  console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
+  if (!options.silent) {
+    console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
+  }
   app.disable('x-powered-by');
   setupApplication();
   readdirp(options.basePath, {
@@ -141,7 +151,9 @@ async function start(port, callback) {
     .on('end', async () => {
       try {
         app.listen(port, () => {
-          console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
+          if (!options.silent) {
+            console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
+          }
           if (callback) callback();
         });
       } catch (error) {
