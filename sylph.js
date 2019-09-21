@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const readdirp = require('readdirp');
+const bodyParser = require('body-parser');
 
 const { version } = require('./package.json');
 const { theme, log, initLogger } = require('./utils');
@@ -140,6 +141,7 @@ async function start(port, callback) {
     console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
   }
   app.disable('x-powered-by');
+  app.use(bodyParser.json());
   setupApplication();
   readdirp(options.basePath, {
     fileFilter: '*.js',
