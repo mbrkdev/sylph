@@ -195,6 +195,12 @@ let options = {
   silent: false,
   // Printed file logging in development
   devLogs: true,
+  // Console based logging in development
+  devConsole: true,
+  // Printed file logging in production
+  prodLogs: true,
+  // Console based logging in production
+  prodConsole: true,
   // CORS Origins
   origins: ['http://localhost:3000'],
 }

@@ -38,10 +38,13 @@ let logger;
 
 function log(prefix, message, type) {
   const logType = type || 'info';
-  if (loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') {
+  if ((loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') && loggerOptions.prodLogs === true) {
     logger[logType](`${prefix.toUpperCase()} > ${message}`);
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (loggerOptions.prodConsole === true) {
+    process.stdout.write(`${type} | ${prefix} | ${message}\n`);
+  }
+  if (loggerOptions.devConsole === true && process.env.NODE_ENV !== 'production') {
     console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 8)} >`)}`, mix(theme[logType], message));
   }
 }

@@ -21,7 +21,10 @@ let options = {
   basePath: 'server',
   clear: true,
   silent: false,
-  devLogs: true,
+  devConsole: true,
+  devLogs: false,
+  prodConsole: false,
+  prodLogs: true,
   origins: ['http://localhost:3000'],
   verbose: false,
 };
