@@ -25,7 +25,7 @@ let options = {
   devLogs: false,
   prodConsole: false,
   prodLogs: true,
-  origins: ['http://localhost:3000'],
+  origins: '*',
   verbose: false,
 };
 
@@ -174,6 +174,7 @@ function setOptions(opts) {
     preflightContinue: false,
     optionsSuccessStatus: 200,
     origin: (origin, callback) => {
+      if (options.origins === '*') return callback(null, true);
       if (!origin) return callback(null, true);
       if (options.origins.indexOf(origin) !== -1) {
         return callback(null, true);
