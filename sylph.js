@@ -87,7 +87,6 @@ function resolveHandler(routePath, type, route) {
           let done = false;
           if (typeof middleware[i] === 'function') { fn = middleware[i]; } else fn = middlewares[middleware[i]];
           await fn(req, res, () => { done = true; });
-          console.log(done);
           if (!done) return;
         }
       }
