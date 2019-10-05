@@ -82,17 +82,19 @@ function resolveHandler(routePath, type, route) {
   app[type](route, async (req, res) => {
     try {
       if (middleware) {
-        middleware.map(async (m) => {
-          if (typeof m === 'function') await m(req, res, () => {});
-          else await middlewares[m](req, res, () => {});
-        });
+        for (let i = 0; i < middleware.length; i += 1) {
+          const fn = middleware[i];
+          let done = false;
+          if (typeof fn === 'function') { fn(req, res, () => { done = true; }); } else middlewares[fn](req, res, () => { done = true; });
+          if (!done) return;
+        }
       }
       await handler(req, res);
     } catch (error) {
       if (!options.silent) {
         log(type, `${route}| ERROR`, 'error');
       }
-      console.log(error);
+      console.error(error);
     }
   });
 }
