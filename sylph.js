@@ -86,6 +86,8 @@ function resolveHandler(routePath, type, route) {
           let fn;
           let done = false;
           if (typeof middleware[i] === 'function') { fn = middleware[i]; } else fn = middlewares[middleware[i]];
+          // Disabling no await in middleware
+          // eslint-disable-next-line
           await fn(req, res, () => { done = true; });
           if (!done) return;
         }
@@ -176,8 +178,7 @@ function setOptions(opts) {
   const corsOptions = {
     preflightContinue: false,
     optionsSuccessStatus: 200,
-    origin: (origin, callback) => {
-      if (options.origins === '*') return callback(null, true);
+    origin: options.origins === '*' ? '*' : (origin, callback) => {
       if (!origin) return callback(null, true);
       if (options.origins.indexOf(origin) !== -1) {
         return callback(null, true);
