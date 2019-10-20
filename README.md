@@ -71,6 +71,18 @@ The ```middleware``` folder is special, all of the files you add inside here are
 
 The ```utils``` folder is ignored by the route builder so you can add shared code here.
 
+## Error Handling
+
+Sylph exposes the ```setErrorHandler``` method for changing the default error logging behavior. This is especially useful when setting it up to work with something like sentry.io as you can easily pipe the error into the exception handler method and gracefully return the error message to the user like below:
+
+```js
+sylph.setErrorHandler((err, req, res) => { 
+  console.error(err.message)
+  Sentry.captureException(err);
+  res.status(500).send({error: err.message})
+})
+```
+
 ## About Transformations
 
 The routes go through multiple transformation steps to get from the filesystem path into a route that express can consume. Each step is detailed below:

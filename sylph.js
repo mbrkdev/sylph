@@ -97,7 +97,7 @@ function resolveHandler(routePath, type, route) {
       if (!options.silent) {
         log(type, `${route}| ERROR`, 'error');
       }
-      console.error(error);
+      handleError(error, req, res)
     }
   });
 }
@@ -165,8 +165,10 @@ async function start(port, callback) {
             console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
           }
           if (callback) callback();
+          app.use(handleError)
         });
       } catch (error) {
+        console.error('err')
         console.log(error);
       }
     });
@@ -191,10 +193,20 @@ function setOptions(opts) {
   app.options('*', cors(corsOptions));
 }
 
+let handleError = (err, req, res) => {
+  console.error(err)
+  if(res && !res.headersSent) {
+    res.status(500).send({error: err.message})
+  }
+}
+
 module.exports = {
   app,
   options: setOptions,
   log,
   expand,
   start,
+  setErrorHandler: (handler) => {
+    handleError = handler
+  }
 };
