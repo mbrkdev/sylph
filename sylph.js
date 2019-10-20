@@ -160,7 +160,7 @@ async function start(port, callback) {
     })
     .on('end', async () => {
       try {
-        app.listen(port, () => {
+        app.listen(port || process.env.SYLPH_PORT, () => {
           if (!options.silent) {
             console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
           }
