@@ -4,8 +4,7 @@
   "main": "sylph.js",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "eslint --init",
-    "test": ""
+    "start": "eslint --init"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
