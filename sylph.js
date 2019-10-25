@@ -142,6 +142,11 @@ function expand(functionality) {
 
 async function start(port, callback) {
   // App Starts
+  // TODO: dirty fix before restructuring on v3
+  let optionsSet = false;
+  if(!optionsSet) {
+    setOptions({})
+  }
   if (options.clear) {
     console.clear();
   }
