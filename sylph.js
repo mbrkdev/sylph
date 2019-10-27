@@ -29,12 +29,23 @@ let options = {
   verbose: false,
 };
 
+let handleError = (err, req, res) => {
+  console.error(err);
+  if (res && !res.headersSent) {
+    res.status(500).send({ error: err.message });
+  }
+};
+
 function setupApplication() {
   // Serve Public Folder
   const publicDir = path.join(dir, options.basePath, 'public');
   const publicExists = fs.existsSync(publicDir);
   if (options.verbose && !options.silent) {
-    log('LOG', `Public ${publicExists ? 'Exists' : 'Doesn\'t Exist @'}`, publicExists ? 'success' : 'error');
+    log(
+      'LOG',
+      `Public ${publicExists ? 'Exists' : "Doesn't Exist @"}`,
+      publicExists ? 'success' : 'error',
+    );
     if (!publicExists) {
       log('LOG', publicDir, 'error');
     }
@@ -50,8 +61,16 @@ function setupApplication() {
   const fav = favExists ? faviconPath : fallbackExists ? fallback : null;
 
   if (options.verbose && !options.silent) {
-    log('LOG', `Public Favicon ${favExists ? 'Exists' : 'Doesn\'t Exist'}`, favExists ? 'success' : 'error');
-    log('LOG', `Fallback Favicon ${fallbackExists ? 'Exists' : 'Doesn\'t Exist'}`, fallbackExists ? 'success' : 'error');
+    log(
+      'LOG',
+      `Public Favicon ${favExists ? 'Exists' : "Doesn't Exist"}`,
+      favExists ? 'success' : 'error',
+    );
+    log(
+      'LOG',
+      `Fallback Favicon ${fallbackExists ? 'Exists' : "Doesn't Exist"}`,
+      fallbackExists ? 'success' : 'error',
+    );
     if (!fav) {
       log('LOG', 'No Favicon Available', 'error');
       log('LOG', `FV: ${faviconPath}`, 'error');
@@ -85,10 +104,14 @@ function resolveHandler(routePath, type, route) {
         for (let i = 0; i < middleware.length; i += 1) {
           let fn;
           let done = false;
-          if (typeof middleware[i] === 'function') { fn = middleware[i]; } else fn = middlewares[middleware[i]];
+          if (typeof middleware[i] === 'function') {
+            fn = middleware[i];
+          } else fn = middlewares[middleware[i]];
           // Disabling no await in middleware
           // eslint-disable-next-line
-          await fn(req, res, () => { done = true; });
+          await fn(req, res, () => {
+            done = true;
+          });
           if (!done) return;
         }
       }
@@ -97,9 +120,32 @@ function resolveHandler(routePath, type, route) {
       if (!options.silent) {
         log(type, `${route}| ERROR`, 'error');
       }
-      handleError(error, req, res)
+      handleError(error, req, res);
     }
   });
+}
+
+
+function setOptions(opts) {
+  options = { ...options, ...opts };
+  initLogger(options);
+  const corsOptions = {
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
+    origin:
+      options.origins === '*'
+        ? '*'
+        : (origin, callback) => {
+          if (!origin) return callback(null, true);
+          if (options.origins.indexOf(origin) !== -1) {
+            return callback(null, true);
+          }
+          return callback(new Error('Not allowed by CORS'));
+        },
+  };
+
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 }
 
 function setRoute(filePath) {
@@ -120,10 +166,13 @@ function setRoute(filePath) {
   // Resolve Middleware
   if (type === 'middleware') {
     const mw = require(routePath).middleware;
-    const fileName = filePath.replace(/\w+[\\|/](.+).js/gi, '$1')
+    const fileName = filePath
+      .replace(/\w+[\\|/](.+).js/gi, '$1')
       .replace(/[\\|/]/, '/');
     middlewares[fileName] = mw;
-    if (options.showMiddleware && !options.silent) { log('Midd', fileName, 'success'); }
+    if (options.showMiddleware && !options.silent) {
+      log('Midd.', fileName, 'success');
+    }
     return;
   }
 
@@ -134,7 +183,9 @@ function setRoute(filePath) {
 }
 
 function expand(functionality) {
-  if (options.showMiddleware && !options.silent) { log('Midd', `Expanded x ${functionality.length}`); }
+  if (options.showMiddleware && !options.silent) {
+    log('Midd', `Expanded x ${functionality.length}`);
+  }
   functionality.map((f) => {
     app.use('/', f);
   });
@@ -143,9 +194,9 @@ function expand(functionality) {
 async function start(port, callback) {
   // App Starts
   // TODO: dirty fix before restructuring on v3
-  let optionsSet = false;
-  if(!optionsSet) {
-    setOptions({})
+  const optionsSet = false;
+  if (!optionsSet) {
+    setOptions({});
   }
   if (options.clear) {
     console.clear();
@@ -167,42 +218,21 @@ async function start(port, callback) {
       try {
         app.listen(port || process.env.SYLPH_PORT, () => {
           if (!options.silent) {
-            console.log(`${mix(theme.info, `Sylph ${mix(theme.silly, version)}`)} listening on port ${mix(theme.info, port)}`);
+            console.log(
+              `${mix(
+                theme.info,
+                `Sylph ${mix(theme.silly, version)}`,
+              )} listening on port ${mix(theme.info, port)}`,
+            );
           }
           if (callback) callback();
-          app.use(handleError)
+          app.use(handleError);
         });
       } catch (error) {
-        console.error('err')
+        console.error('err');
         console.log(error);
       }
     });
-}
-
-function setOptions(opts) {
-  options = { ...options, ...opts };
-  initLogger(options);
-  const corsOptions = {
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
-    origin: options.origins === '*' ? '*' : (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (options.origins.indexOf(origin) !== -1) {
-        return callback(null, true);
-      }
-      return callback(new Error('Not allowed by CORS'));
-    },
-  };
-
-  app.use(cors(corsOptions));
-  app.options('*', cors(corsOptions));
-}
-
-let handleError = (err, req, res) => {
-  console.error(err)
-  if(res && !res.headersSent) {
-    res.status(500).send({error: err.message})
-  }
 }
 
 module.exports = {
@@ -212,6 +242,6 @@ module.exports = {
   expand,
   start,
   setErrorHandler: (handler) => {
-    handleError = handler
-  }
+    handleError = handler;
+  },
 };
