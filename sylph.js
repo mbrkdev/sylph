@@ -141,7 +141,11 @@ function setRoute(type, route, handler, middleware) {
   if (type === 'middleware') {
     middlewares[route] = middleware;
     if (!options.silent) {
-      log('Middleware', route, 'success');
+      if (middleware) {
+        log('Middleware', route, 'success');
+      } else {
+        log('Middleware', route, 'error');
+      }
     }
     return;
   }
