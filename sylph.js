@@ -9,7 +9,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const { version } = require('./package.json');
-const { theme, log, initLogger } = require('./utils');
+const { theme, log } = require('./utils');
 
 // Application Variables
 const app = express();
@@ -138,8 +138,6 @@ function setOptions(opts) {
 }
 
 function setRoute(type, route, handler, middleware) {
-  console.log(type, route, handler, middleware);
-
   if (type === 'middleware') {
     middlewares[route] = middleware;
     if (!options.silent) {
@@ -147,7 +145,6 @@ function setRoute(type, route, handler, middleware) {
     }
     return;
   }
-
   resolveHandler(type, route, handler, middleware);
 }
 
@@ -177,7 +174,6 @@ async function start(port, callback) {
   app.use(bodyParser.json());
   setupApplication();
   const routes = await scan('server', ['handler', 'middleware']);
-  console.log(routes);
   Object.keys(routes).forEach((route) => {
     const { handler, middleware, type } = routes[route];
     setRoute(type, route, handler, middleware);
