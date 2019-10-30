@@ -85,10 +85,16 @@ function setupApplication() {
 
 function resolveHandler(type, route, handler, middleware) {
   // Resolve handler
+  console.log(type, route, handler);
   if (!options.silent) {
-    log(type, route, 'success');
+    if (handler) {
+      log(type, route, 'success');
+    } else {
+      log(type, route, 'error');
+    }
   }
-  app[type](route, async (req, res) => {
+  if (!handler) return;
+  app[type](`/${route}`, async (req, res) => {
     try {
       if (middleware) {
         for (let i = 0; i < middleware.length; i += 1) {
@@ -153,9 +159,6 @@ function setRoute(type, route, handler, middleware) {
 }
 
 function expand(functionality) {
-  if (options.showMiddleware && !options.silent) {
-    log('Midd', `Expanded x ${functionality.length}`);
-  }
   functionality.map((f) => {
     app.use('/', f);
   });
