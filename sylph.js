@@ -85,7 +85,6 @@ function setupApplication() {
 
 function resolveHandler(type, route, handler, middleware) {
   // Resolve handler
-  console.log(type, route, handler);
   if (!options.silent) {
     if (handler) {
       log(type, route, 'success');
