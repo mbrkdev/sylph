@@ -1,11 +1,11 @@
 // Imports
 const { mix } = require('nano-rgb');
 const express = require('express');
+const { scan } = require('sylph-router');
 
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
-const readdirp = require('readdirp');
 const bodyParser = require('body-parser');
 
 const { version } = require('./package.json');
@@ -16,15 +16,12 @@ const app = express();
 const dir = process.cwd();
 
 const middlewares = {};
+const state = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
   clear: true,
   silent: false,
-  devConsole: true,
-  devLogs: false,
-  prodConsole: false,
-  prodLogs: true,
   origins: '*',
   verbose: false,
 };
@@ -86,15 +83,8 @@ function setupApplication() {
   }
 }
 
-function resolveHandler(routePath, type, route) {
+function resolveHandler(type, route, handler, middleware) {
   // Resolve handler
-  const { handler, middleware } = require(routePath);
-  if (!handler) {
-    if (!options.silent) {
-      log(type, route, 'error');
-    }
-    return;
-  }
   if (!options.silent) {
     log(type, route, 'success');
   }
@@ -115,7 +105,7 @@ function resolveHandler(routePath, type, route) {
           if (!done) return;
         }
       }
-      await handler(req, res);
+      await handler(req, res, state);
     } catch (error) {
       if (!options.silent) {
         log(type, `${route}| ERROR`, 'error');
@@ -128,7 +118,6 @@ function resolveHandler(routePath, type, route) {
 
 function setOptions(opts) {
   options = { ...options, ...opts };
-  initLogger(options);
   const corsOptions = {
     preflightContinue: false,
     optionsSuccessStatus: 200,
@@ -148,38 +137,18 @@ function setOptions(opts) {
   app.options('*', cors(corsOptions));
 }
 
-function setRoute(filePath) {
-  // Determine type
-  const type = filePath.replace(/(\w+)[\\|/](.+).js/, '$1');
-  // Route Normalization
-  const cleanRoute = filePath
-    .replace(/\w+[\\|/](.+).js/gi, '$1') // Strip all but path
-    .replace('index.js', '.js') // Change index to just .js
-    .replace('\\', '/') // Backslash to forward slash
-    .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
-    .replace(' ', '-') // Spaces to dashes
-    .replace('_', ':'); // Underscore to colon (for dynamic routes)
-  let route = `/${cleanRoute}`;
+function setRoute(type, route, handler, middleware) {
+  console.log(type, route, handler, middleware);
 
-  const routePath = `${process.cwd()}/${options.basePath}/${filePath}`;
-
-  // Resolve Middleware
   if (type === 'middleware') {
-    const mw = require(routePath).middleware;
-    const fileName = filePath
-      .replace(/\w+[\\|/](.+).js/gi, '$1')
-      .replace(/[\\|/]/, '/');
-    middlewares[fileName] = mw;
-    if (options.showMiddleware && !options.silent) {
-      log('Midd.', fileName, 'success');
+    middlewares[route] = middleware;
+    if (!options.silent) {
+      log('Middleware', route, 'success');
     }
     return;
   }
 
-  // Removes 'index' only if it's at the end of a route
-  route = route.replace(/[\\|/]index$/, '');
-
-  resolveHandler(routePath, type, route);
+  resolveHandler(type, route, handler, middleware);
 }
 
 function expand(functionality) {
@@ -207,32 +176,23 @@ async function start(port, callback) {
   app.disable('x-powered-by');
   app.use(bodyParser.json());
   setupApplication();
-  readdirp(options.basePath, {
-    fileFilter: '*.js',
-    directoryFilter: ['!public', '!*utils'],
-  })
-    .on('data', (entry) => {
-      setRoute(entry.path);
-    })
-    .on('end', async () => {
-      try {
-        app.listen(port || process.env.SYLPH_PORT, () => {
-          if (!options.silent) {
-            console.log(
-              `${mix(
-                theme.info,
-                `Sylph ${mix(theme.silly, version)}`,
-              )} listening on port ${mix(theme.info, port)}`,
-            );
-          }
-          if (callback) callback();
-          app.use(handleError);
-        });
-      } catch (error) {
-        console.error('err');
-        console.log(error);
-      }
-    });
+  const routes = await scan('server', ['handler', 'middleware']);
+  console.log(routes);
+  Object.keys(routes).forEach((route) => {
+    const { handler, middleware, type } = routes[route];
+    setRoute(type, route, handler, middleware);
+  });
+  app.listen(port || process.env.SYLPH_PORT, () => {
+    if (!options.silent) {
+      console.log(
+        `${mix(
+          theme.info,
+          `Sylph ${mix(theme.silly, version)}`,
+        )} listening on port ${mix(theme.info, port)}`,
+      );
+    }
+    if (callback) callback();
+  });
 }
 
 module.exports = {

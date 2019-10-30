@@ -1,8 +1,4 @@
 const { mix, rgb } = require('nano-rgb');
-const path = require('path');
-const winston = require('winston');
-
-const { combine, timestamp, json } = winston.format;
 
 function spacer(message, length) {
   let _r = message;
@@ -20,55 +16,20 @@ const theme = {
   success: rgb(52, 235, 155),
 };
 
-const logstamp = Date.now();
-
-let loggerOptions = {};
-
-const sylphLevels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  verbose: 3,
-  debug: 4,
-  silly: 5,
-  success: 6,
-};
-
 let logger;
 
 function log(prefix, message, type) {
   const logType = type || 'info';
-  if ((loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') && loggerOptions.prodLogs === true) {
+  if (process.env.NODE_ENV === 'production') {
     logger[logType](`${prefix.toUpperCase()} > ${message}`);
   }
-  if (loggerOptions.prodConsole === true) {
-    process.stdout.write(`${type} | ${prefix} | ${message}\n`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 11)} >`)}`, mix(theme[logType], message));
   }
-  if (loggerOptions.devConsole === true && process.env.NODE_ENV !== 'production') {
-    console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 8)} >`)}`, mix(theme[logType], message));
-  }
-}
-
-function initLogger(options) {
-  loggerOptions = options;
-  let transports = [];
-  if (loggerOptions.devLogs === true || process.env.NODE_ENV === 'production') {
-    transports = [
-      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-all.log`), level: 'success' }),
-      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-info.log`), level: 'info' }),
-      new winston.transports.File({ filename: path.join(process.cwd(), `logs/${logstamp}-error.log`), level: 'error' }),
-    ];
-  }
-  logger = winston.createLogger({
-    levels: sylphLevels,
-    format: combine(timestamp(), json()),
-    transports,
-  });
 }
 
 module.exports = {
   spacer,
   theme,
   log,
-  initLogger,
 };
