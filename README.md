@@ -176,6 +176,9 @@ module.exports.middleware = [
 let options = {
   // Base path to crawl for server routes
   basePath: 'server',
+  // Base path in the url of an endpoint
+  // apiBase: 'api', // -> /api/<endpoint>
+  apiBase: '',
   // Should the app clear the terminal when it starts?
   clear: true,
   // Start silently (no init logging)

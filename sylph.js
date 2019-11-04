@@ -20,6 +20,7 @@ const state = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
+  apiBase: '',
   clear: true,
   silent: false,
   origins: '*',
@@ -93,7 +94,7 @@ function resolveHandler(type, route, handler, middleware) {
     }
   }
   if (!handler) return;
-  app[type](`/${route}`, async (req, res) => {
+  app[type](`${options.apiBase ? `/${options.apiBase}` : ''}/${route}`, async (req, res) => {
     try {
       if (middleware) {
         for (let i = 0; i < middleware.length; i += 1) {
