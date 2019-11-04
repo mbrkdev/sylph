@@ -183,8 +183,10 @@ let options = {
   clear: true,
   // Start silently (no init logging)
   silent: false,
+  // HTML5 history mode toggle for /public folder
+  historyMode: false,
   // CORS Origins
-  origins: ['http://localhost:3000'],
+  origins: ['*'],
 }
 ```
 

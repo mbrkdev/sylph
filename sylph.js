@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const history = require('connect-history-api-fallback');
 
 const { version } = require('./package.json');
 const { theme, log } = require('./utils');
@@ -20,6 +21,7 @@ const state = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
+  historyMode: false,
   apiBase: '',
   clear: true,
   silent: false,
@@ -170,6 +172,9 @@ async function start(port, callback) {
   const optionsSet = false;
   if (!optionsSet) {
     setOptions({});
+  }
+  if (options.historyMode) {
+    app.use(history());
   }
   if (options.clear) {
     console.clear();
