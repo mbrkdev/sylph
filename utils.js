@@ -19,7 +19,7 @@ const theme = {
 function log(prefix, message, type) {
   const logType = type || 'info';
   if (process.env.NODE_ENV === 'production') {
-    console.log(`${prefix.toUpperCase()} > ${message}`);
+    console.log(`${new Date().toUTCString()} | ${prefix.toUpperCase()} > ${message}`);
   }
   if (process.env.NODE_ENV !== 'production') {
     console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 11)} >`)}`, mix(theme[logType], message));
