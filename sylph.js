@@ -186,8 +186,18 @@ async function start(port, callback) {
   app.use(bodyParser.json());
   setupApplication();
   const routes = await scan('server', ['handler', 'middleware']);
+  const special = {};
   Object.keys(routes).forEach((route) => {
+    if (route.includes(':')) {
+      special[route] = routes[route];
+      return;
+    }
     const { handler, middleware, type } = routes[route];
+    setRoute(type, route, handler, middleware);
+  });
+  Object.keys(special).forEach((route) => {
+    if (!route.includes(':')) return;
+    const { handler, middleware, type } = special[route];
     setRoute(type, route, handler, middleware);
   });
   app.listen(port || process.env.SYLPH_PORT, () => {
