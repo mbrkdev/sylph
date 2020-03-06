@@ -200,7 +200,7 @@ async function start(port, callback) {
     const { handler, middleware, type } = special[route];
     setRoute(type, route, handler, middleware);
   });
-  app.listen(port || process.env.SYLPH_PORT, () => {
+  return app.listen(port || process.env.SYLPH_PORT, () => {
     if (!options.silent) {
       console.log(
         `${mix(
