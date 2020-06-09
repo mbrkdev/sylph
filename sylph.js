@@ -166,7 +166,7 @@ function expand(functionality) {
   });
 }
 
-async function start(port, callback) {
+async function setup() {
   // App Starts
   // TODO: dirty fix before restructuring on v3
   const optionsSet = false;
@@ -200,6 +200,10 @@ async function start(port, callback) {
     const { handler, middleware, type } = special[route];
     setRoute(type, route, handler, middleware);
   });
+}
+
+async function start(port, callback) {
+  await setup()
   return app.listen(port || process.env.SYLPH_PORT, () => {
     if (!options.silent) {
       console.log(
@@ -219,6 +223,7 @@ module.exports = {
   log,
   expand,
   start,
+  setup,
   setErrorHandler: (handler) => {
     handleError = handler;
   },
