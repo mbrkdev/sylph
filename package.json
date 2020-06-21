@@ -13,13 +13,20 @@
     "express": "^4.17.1",
     "nano-rgb": "^1.1.0",
     "readdirp": "^3.1.3",
-    "sylph-router": "^1.1.0"
+    "sylph-router": "^2.0.0"
   },
   "devDependencies": {
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2"
   },
+  "files": [
+    "LICENSE",
+    "favicon.ico",
+    "sylph.js",
+    "utils.js",
+    "README.md"
+  ],
   "repository": "git@github.com:jetdevuk/sylph.git",
   "author": "Matt Barker <jetdevuk@gmail.com>"
 }

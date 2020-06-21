@@ -1419,10 +1419,10 @@ supports-color@^5.3.0:
   dependencies:
     has-flag "^3.0.0"
 
-sylph-router@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/sylph-router/-/sylph-router-1.1.0.tgz#7b19118dc148e35756ab8e13ef7fe05677e2df34"
-  integrity sha512-jIQjNQL616d2evVMGO/rN7lHpJXliyRvqINT/ZYkr3/oWS+ekkTkMOz0PJQQD3dLx62dyb4LGHGJjlDU2aV1mg==
+sylph-router@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/sylph-router/-/sylph-router-2.0.0.tgz#b443d5db2e9a4faaeeeb5764b8133fa2cd06dbd3"
+  integrity sha512-5obMsHMNc1ttw7Vat9gH1VovBgBLYJnKy3ka+DaNB818iiJWm59uBztrSPsbhitgcsQcmuuhnDYlc5AAVH9k5w==
   dependencies:
     readdirp "^3.1.3"
 

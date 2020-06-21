@@ -185,8 +185,34 @@ async function setup() {
   app.disable('x-powered-by');
   app.use(bodyParser.json());
   setupApplication();
-  const routes = await scan('server', ['handler', 'middleware']);
+  const scanResults = await scan('server', ['handler', 'middleware'], {
+    replaceFunction: (route) => route
+      .replace(/\\/gi, '/') // Backslash to forward slash
+      .replace(/\/$/gi, '') // Remove ending slash (for xx/index)
+      .replace(/ /gi, '-') // Spaces to dashes
+      .replace(/index.([t|j])s/, '.$1s') // Change index to just .t/js
+      .replace(/\.[t|j]s/g, '') // Remove .t/js
+      .replace(/_/gi, ':') // Underscore to colon (for dynamic routes)
+      .replace(/\/$/gi, '') // Remove ending slash (for xx/index));
+      .replace(/^(\w+)$/, '$1/') // replace xxx/index with xxx/
+    ,
+  });
   const special = {};
+  const routes = {};
+  Object.keys(scanResults).forEach((result) => {
+    console.log(result);
+    const spl = result.split('/');
+    const type = spl[0];
+    const r = result.replace(type, '') || '/';
+    const { handler, middleware } = scanResults[result];
+    routes[r] = {
+      type,
+      route: r,
+      handler,
+      middleware,
+    };
+  });
+
   Object.keys(routes).forEach((route) => {
     if (route.includes(':')) {
       special[route] = routes[route];
@@ -203,7 +229,7 @@ async function setup() {
 }
 
 async function start(port, callback) {
-  await setup()
+  await setup();
   return app.listen(port || process.env.SYLPH_PORT, () => {
     if (!options.silent) {
       console.log(
