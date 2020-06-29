@@ -16,7 +16,8 @@ function log(prefix, message, type) {
     console.log(`${new Date().toUTCString()} | ${prefix.toUpperCase()} > ${message}`);
   }
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${prefix.toUpperCase().padEnd(11)} >`)}`, mix(theme[logType], message));
+    const colour = theme[logType];
+    console.log(`${mix(colour, `  |  ${prefix.toUpperCase().padEnd(11)} >`)}`, mix(colour, message));
   }
 }
 
