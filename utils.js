@@ -1,11 +1,5 @@
 const { mix, rgb } = require('nano-rgb');
 
-function spacer(message, length) {
-  let _r = message;
-  while (_r.length < length) _r += ' ';
-  return _r;
-}
-
 const theme = {
   error: rgb(235, 97, 52),
   warn: rgb(235, 189, 52),
@@ -22,12 +16,11 @@ function log(prefix, message, type) {
     console.log(`${new Date().toUTCString()} | ${prefix.toUpperCase()} > ${message}`);
   }
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${spacer(prefix.toUpperCase(), 11)} >`)}`, mix(theme[logType], message));
+    console.log(`${mix(theme[logType === 'error' ? 'error' : 'info'], `  |  ${prefix.toUpperCase().padEnd(11)} >`)}`, mix(theme[logType], message));
   }
 }
 
 module.exports = {
-  spacer,
   theme,
   log,
 };
