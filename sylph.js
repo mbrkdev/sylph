@@ -88,15 +88,16 @@ function setupApplication() {
 
 function resolveHandler(type, route, handler, middleware) {
   // Resolve handler
+  const trueRoute = route.replace(type, '');
   if (!options.silent) {
     if (handler) {
-      log(type, route, 'success');
+      log(type, trueRoute, 'success');
     } else {
-      log(type, route, 'error');
+      log(type, trueRoute, 'error');
     }
   }
   if (!handler) return;
-  app[type](`${options.apiBase ? `/${options.apiBase}` : ''}/${route}`, async (req, res) => {
+  app[type](`${options.apiBase ? `/${options.apiBase}` : ''}/${trueRoute}`, async (req, res) => {
     try {
       if (middleware) {
         for (let i = 0; i < middleware.length; i += 1) {
@@ -116,7 +117,7 @@ function resolveHandler(type, route, handler, middleware) {
       await handler(req, res, state);
     } catch (error) {
       if (!options.silent) {
-        log(type, `${route}| ERROR`, 'error');
+        log(type, `${trueRoute}| ERROR`, 'error');
       }
       handleError(error, req, res);
     }
@@ -200,14 +201,13 @@ async function setup() {
   const special = {};
   const routes = {};
   Object.keys(scanResults).forEach((result) => {
-    console.log(result);
     const spl = result.split('/');
     const type = spl[0];
-    const r = result.replace(type, '') || '/';
+    const r = result || '/';
     const { handler, middleware } = scanResults[result];
     routes[r] = {
       type,
-      route: r,
+      route: r.replace(type, ''),
       handler,
       middleware,
     };
