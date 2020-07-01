@@ -98,7 +98,7 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
 
-body-parser@1.19.0, body-parser@^1.19.0:
+body-parser@1.19.0:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.19.0.tgz#96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
   integrity sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw==
@@ -179,11 +179,6 @@ confusing-browser-globals@^1.0.7:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-1.0.8.tgz#93ffec1f82a6e2bf2bc36769cc3a92fa20e502f3"
   integrity sha512-lI7asCibVJ6Qd3FGU7mu4sfG4try4LX3+GVS+Gv8UlrEf2AeW57piecapnog2UHZSbcX/P/1UDWVaTsblowlZg==
-
-connect-history-api-fallback@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/connect-history-api-fallback/-/connect-history-api-fallback-1.6.0.tgz#8b32089359308d111115d81cad3fceab888f97bc"
-  integrity sha512-e54B99q/OUoH64zYYRf3HBP5z24G38h5D3qXu23JGRoigpX5Ss4r9ZnDk3g0Z8uQC2x2lPaJ+UlWBc1ZWBWdLg==
 
 contains-path@^0.1.0:
   version "0.1.0"

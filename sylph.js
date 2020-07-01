@@ -6,8 +6,6 @@ const { scan } = require('sylph-router');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const history = require('connect-history-api-fallback');
 
 const { version } = require('./package.json');
 const { theme, log } = require('./utils');
@@ -21,7 +19,6 @@ const state = {};
 let options = {
   showMiddleware: false,
   basePath: 'server',
-  historyMode: false,
   apiBase: '',
   clear: true,
   silent: false,
@@ -51,6 +48,7 @@ function setupApplication() {
     }
   }
   if (publicExists) app.use(express.static(publicDir));
+  app.use(express.json());
 
   // Default Favicon Handling
   const faviconPath = path.join(dir, `${options.basePath}/public/favicon.ico`);
@@ -97,7 +95,7 @@ function resolveHandler(type, route, handler, middleware) {
     }
   }
   if (!handler) return;
-  app[type](`${options.apiBase ? `/${options.apiBase}` : ''}/${trueRoute}`, async (req, res) => {
+  app[type](`${options.apiBase ? `/${options.apiBase}` : ''}${trueRoute}`, async (req, res) => {
     try {
       if (middleware) {
         for (let i = 0; i < middleware.length; i += 1) {
@@ -170,13 +168,7 @@ function expand(functionality) {
 async function setup() {
   // App Starts
   // TODO: dirty fix before restructuring on v3
-  const optionsSet = false;
-  if (!optionsSet) {
-    setOptions({});
-  }
-  if (options.historyMode) {
-    app.use(history());
-  }
+  setOptions({});
   if (options.clear) {
     console.clear();
   }
@@ -184,7 +176,7 @@ async function setup() {
     console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
   }
   app.disable('x-powered-by');
-  app.use(bodyParser.json());
+  // app.use(bodyParser.json());
   setupApplication();
   const scanResults = await scan('server', ['handler', 'middleware'], {
     replaceFunction: (route) => route
