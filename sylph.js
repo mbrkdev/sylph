@@ -146,14 +146,8 @@ function setOptions(opts) {
 
 function setRoute(type, route, handler, middleware) {
   if (type === 'middleware') {
-    middlewares[route] = middleware;
-    if (!options.silent) {
-      if (middleware) {
-        log('Middleware', route, 'success');
-      } else {
-        log('Middleware', route, 'error');
-      }
-    }
+    const r = route.replace('middleware/', '');
+    middlewares[r] = middleware;
     return;
   }
   resolveHandler(type, route, handler, middleware);
@@ -176,7 +170,6 @@ async function setup() {
     console.log(`${mix(theme.info, 'Sylph')} Engine Starting`);
   }
   app.disable('x-powered-by');
-  // app.use(bodyParser.json());
   setupApplication();
   const scanResults = await scan('server', ['handler', 'middleware'], {
     replaceFunction: (route) => route
@@ -217,6 +210,9 @@ async function setup() {
     if (!route.includes(':')) return;
     const { handler, middleware, type } = special[route];
     setRoute(type, route, handler, middleware);
+  });
+  Object.entries(middlewares).forEach(([name, fn]) => {
+    log('MW', name, fn ? 'success' : 'error');
   });
 }
 
