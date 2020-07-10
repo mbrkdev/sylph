@@ -10,7 +10,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "nano-rgb": "^1.1.0",
-    "sylph-router": "^2.0.0"
+    "sylph-router": "^2.1.0"
   },
   "devDependencies": {
     "eslint": "^6.5.1",

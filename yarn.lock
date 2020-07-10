@@ -1120,11 +1120,6 @@ path-type@^2.0.0:
   dependencies:
     pify "^2.0.0"
 
-picomatch@^2.0.4:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.0.7.tgz#514169d8c7cd0bdbeecc8a2609e34a7163de69f6"
-  integrity sha512-oLHIdio3tZ0qH76NybpeneBhYVj0QFTfXEFTc/B3zKQspYfYYkWYgFsmzo+4kvId/bQRcNkVeguI3y+CD22BtA==
-
 pify@^2.0.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
@@ -1196,13 +1191,6 @@ read-pkg@^2.0.0:
     load-json-file "^2.0.0"
     normalize-package-data "^2.3.2"
     path-type "^2.0.0"
-
-readdirp@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-3.1.3.tgz#d6e011ed5b9240a92f08651eeb40f7942ceb6cc1"
-  integrity sha512-ZOsfTGkjO2kqeR5Mzr5RYDbTGYneSkdNKX2fOX2P5jF7vMrd/GNnIAUtDldeHHumHUCQ3V05YfWUdxMPAsRu9Q==
-  dependencies:
-    picomatch "^2.0.4"
 
 regexpp@^2.0.1:
   version "2.0.1"
@@ -1414,12 +1402,10 @@ supports-color@^5.3.0:
   dependencies:
     has-flag "^3.0.0"
 
-sylph-router@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/sylph-router/-/sylph-router-2.0.0.tgz#b443d5db2e9a4faaeeeb5764b8133fa2cd06dbd3"
-  integrity sha512-5obMsHMNc1ttw7Vat9gH1VovBgBLYJnKy3ka+DaNB818iiJWm59uBztrSPsbhitgcsQcmuuhnDYlc5AAVH9k5w==
-  dependencies:
-    readdirp "^3.1.3"
+sylph-router@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/sylph-router/-/sylph-router-2.1.0.tgz#1ff81cfced7cf2bf2997155eac721f0a7db039d2"
+  integrity sha512-8hRkUgWNdyEPaMnAGpzYmYPY5DxzoyxwjQSLqJrB/+x3GYxbn90oitETY5bU2qGjKol5SAqz56oqOISyTWdbrg==
 
 table@^5.2.3:
   version "5.4.6"
